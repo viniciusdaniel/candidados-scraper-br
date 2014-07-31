@@ -1,0 +1,6 @@
+development:
+  sessions:
+    default:
+      database: scraper_politicians_development
+      hosts:
+        - localhost:27017

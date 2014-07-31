@@ -11,7 +11,9 @@ GEM
       thread_safe (~> 0.1)
       tzinfo (~> 1.1)
     bson (2.3.0)
+    bson_ext (1.5.1)
     builder (3.2.2)
+    coderay (1.1.0)
     connection_pool (2.0.0)
     domain_name (0.5.19)
       unf (>= 0.0.5, < 1.0.0)
@@ -28,6 +30,7 @@ GEM
       nokogiri (~> 1.4)
       ntlm-http (~> 0.1, >= 0.1.1)
       webrobots (>= 0.0.9, < 0.2)
+    method_source (0.8.2)
     mime-types (2.3)
     mini_portile (0.6.0)
     minitest (5.4.0)
@@ -47,6 +50,11 @@ GEM
     ntlm-http (0.1.1)
     optionable (0.2.0)
     origin (2.1.1)
+    pry (0.10.0)
+      coderay (~> 1.1.0)
+      method_source (~> 0.8.1)
+      slop (~> 3.4)
+    slop (3.6.0)
     thread_safe (0.3.4)
     tzinfo (1.2.1)
       thread_safe (~> 0.1)
@@ -59,5 +67,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  mechanize (~> 2.7.3)
+  bson_ext (~> 1.5)
+  mechanize (~> 2.7)
   mongoid (~> 4.0)
+  pry (~> 0.10)
