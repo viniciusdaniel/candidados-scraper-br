@@ -2,7 +2,7 @@ module Eleicao
   class Candidato
     include Mongoid::Document
 
-    field :url, type: String
+    field :url_profile, type: String
     field :uf, type: String
     field :ultima_atualizacao, type: DateTime
 
@@ -13,7 +13,6 @@ module Eleicao
     field :cor, type: String
     field :nacionalidade, type: String
     field :grau_instrucao, type: String
-    field :situacao_candidato, type: String
     field :partido, type: String
     field :partido_sigla, type: String
     field :coligacao, type: String
