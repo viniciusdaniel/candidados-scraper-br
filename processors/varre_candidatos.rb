@@ -1,5 +1,7 @@
 module Processors
   class VarreCandidatos
+    include Formatter
+
     attr_accessor :uf, :cargo_id, :persist_raw, :logger
 
     def self.process(uf, cargo_id, options = {})
@@ -35,10 +37,6 @@ module Processors
       end
     end
 
-    def clean!(text)
-      text.strip
-    end
-
     def process
       scraper = Scraper.new
       response = scraper.get page_url
@@ -54,6 +52,8 @@ module Processors
           data[:id] = line.attr('id')
           next if data[:id].nil?
 
+          data[:uf] = uf
+
           a = line.search('td:nth-of-type(1) a')
           data[:nome_completo] = clean! a.text
           data[:url_profile] = clean! a.attr('href').text
@@ -66,6 +66,9 @@ module Processors
 
           candidato = Eleicao::Candidato.find_or_initialize_by id: data[:id]
           data.each_pair{ |k,v| candidato[k] = v }
+          candidato.save
+
+          candidato.cargo = Eleicao::Cargo.find_by(id: cargo_id)
           candidato.save
         end
       end

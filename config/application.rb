@@ -4,6 +4,7 @@ require 'pry'
 
 dependencies = [
   File.expand_path('../initializers/**/*.rb', __FILE__),
+  File.expand_path('../../libs/**/*.rb', __FILE__),
   File.expand_path('../../models/**/*.rb', __FILE__),
   File.expand_path('../../processors/**/*.rb', __FILE__),
 ]
@@ -30,9 +31,13 @@ module Eleicoes
       end
     end
 
+    def varre_perfis_candidatos
+      Processors::PerfilCandidato.process '280000000085'
+    end
+
     def self.run
       app = Eleicoes::Application.new
-      app.varre_candidatos
+      app.varre_perfis_candidatos
     end
   end
 end

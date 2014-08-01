@@ -13,6 +13,7 @@ module Eleicao
     field :cor, type: String
     field :nacionalidade, type: String
     field :grau_instrucao, type: String
+    field :site, type: String
     field :partido, type: String
     field :partido_sigla, type: String
     field :coligacao, type: String
@@ -26,7 +27,7 @@ module Eleicao
     field :naturalidade, type: String
     field :ocupacao, type: String
 
-    field :protocolo, type: String
+    field :numero_protocolo, type: String
     field :limite_gastos, type: String
 
     field :url_foto, type: String
@@ -36,13 +37,13 @@ module Eleicao
 
     include Mongoid::Timestamps
 
-    embeds_one :cargo, class_name: "Eleicao::Cargo"
-    embeds_many :bens, class_name: "Eleicao::Bem"
-    embeds_many :certidoes, class_name: "Eleicao::Certidao"
-    embeds_many :propostas, class_name: "Eleicao::Proposta"
-    embeds_one :eleicoes, class_name: "Eleicao::Eleicao"
+    has_one :cargo, class_name: "Eleicao::Cargo"
+    has_many :bens, class_name: "Eleicao::Bem"
+    has_many :certidoes, class_name: "Eleicao::Certidao"
+    has_many :propostas, class_name: "Eleicao::Proposta"
+    has_many :eleicoes, class_name: "Eleicao::Eleicao"
 
-    has_and_belongs_to_many :candidatos_relacionado, class_name: "Eleicao::Candidato"
+    has_and_belongs_to_many :candidatos_relacionados, class_name: "Eleicao::Candidato"
 
     index({ id: 1 }, { unique: true, background: true })
   end
