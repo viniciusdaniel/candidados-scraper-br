@@ -7,4 +7,10 @@ namespace :eleicoes do
       cargo.save
     end
   end
+
+  desc "Varre o site a procura de candidatos"
+  task :varre_candidados do
+    app = Eleicoes::Application.new
+    app.varre_candidatos
+  end
 end

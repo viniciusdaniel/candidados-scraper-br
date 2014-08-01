@@ -1,16 +1,19 @@
 module Processors
-  class ListaCandidatos
-    attr_accessor :uf, :cargo_id
+  class VarreCandidatos
+    attr_accessor :uf, :cargo_id, :persist_raw, :logger
 
-    def self.process(uf, cargo_id)
-      puts "UF: #{uf} #{cargo_id}"
-      lc = Processors::ListaCandidatos.new uf, cargo_id
-      lc.process
+    def self.process(uf, cargo_id, options = {})
+      executor = Processors::VarreCandidatos.new uf, cargo_id, options
+      executor.process
     end
 
-    def initialize(uf, cargo_id)
+    def initialize(uf, cargo_id, options = {})
       @uf = uf
       @cargo_id = cargo_id
+      @logger = options.fetch :logger, Logger.new(STDOUT)
+      @persist_raw = options.fetch :persist_raw, true
+
+      @logger.info "Cargo: #{CARGOS[cargo_id]} UF: #{uf}"
     end
 
     def base_url
@@ -22,7 +25,7 @@ module Processors
     end
 
     def persist_raw(data)
-      path = File.join Application.root, 'data', CARGOS[cargo_id].downcase.parameterize
+      path = File.join Eleicoes::Application.root, 'data', CARGOS[cargo_id].downcase.parameterize
       Dir.mkdir(path, 0766) unless Dir.exists?(path)
 
       path = File.join path, "#{uf}.txt"
@@ -39,11 +42,13 @@ module Processors
     def process
       scraper = Scraper.new
       response = scraper.get page_url
-      persist_raw response.body
+      persist_raw response.body if @persist_raw
 
       lines = response.search '#tbl-candidatos tr'
 
       if lines
+        @logger.info "Resultado: #{lines.count} #{lines.count != 1 ? 'candidatos encontrados' : 'candidato encontrado'}"
+
         lines.each do |line|
           data = {}
           data[:id] = line.attr('id')
