@@ -20,18 +20,23 @@ namespace :eleicoes do
   desc "Varre os perfis encontrados previamente e completa as informações do candidato"
   task :varre_perfis, :max_threads do |_, args|
     max_threads = (args[:max_threads] || 20).to_i
-    thread_count = 0
     threads = []
+    logger = Logger.new File.join(Eleicoes::Application.root, 'logs', 'varre_perfis.log')
+    semaphore = Mutex.new
+    candidato_ids = Eleicao::Candidato.pluck(:id)
 
-    cadidato_ids = Eleicao::Candidato.pluck(:id)
-    cadidato_ids.each do |candidato_id|
-      threads << Thread.new(thread_count+=1) do |_|
-        processor = Processors::PerfilCandidato.new(candidato_id)
-        processor.process
+    0.upto(max_threads) do |thread_count|
+      threads << Thread.new(thread_count) do |_|
+        begin
+          candidato_id = semaphore.synchronize { candidato_ids.pop }
+          break if candidato_id.nil?
+
+          processor = Processors::PerfilCandidato.new candidato_id, logger: logger
+          processor.process
+        end while true
       end
-
-       threads.each{ |t| t.join } and threads = [] if thread_count >= max_threads
     end
-    threads.each{ |t| t.join } if thread_count > 0
+
+    threads.each{ |t| t.join }
   end
 end

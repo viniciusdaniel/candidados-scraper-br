@@ -35,6 +35,8 @@ module Eleicao
     field :total_bens, type: String
     field :acompanhamento_processual_url, type: String
 
+    field :scraped_at, type: DateTime
+
     include Mongoid::Timestamps
 
     has_one :cargo, class_name: "Eleicao::Cargo"

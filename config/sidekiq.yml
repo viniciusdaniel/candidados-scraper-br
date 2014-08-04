@@ -1,0 +1,7 @@
+---
+verbose: true
+pidfile: /tmp/sidekiq.pid
+concurrency: 25
+timeout: 30
+queues:
+  - [scrapers, 50]

@@ -157,21 +157,30 @@ module Processors
     end
 
     def process
-      candidato = Eleicao::Candidato.find_by id: id
-      if candidato.nil?
+      @candidato = Eleicao::Candidato.find_by id: id
+      if @candidato.nil?
         logger.warn "Candidato não encontrado pelo ID #{id}"
       else
-        logger.info "Candidato: #{candidato.id} - #{candidato.nome_completo}"
+        logger.info "Candidato: #{@candidato.id} - #{@candidato.nome_completo}"
 
-        response = @scraper.get base_url(candidato.url_profile)
-        persist_raw response.body if @persist_raw
+        begin
+          response = @scraper.get base_url(@candidato.url_profile)
+          persist_raw response.body if @persist_raw
 
-        @candidato = parse_perfil response
-        parse_bens response
-        parse_certidoes response
-        parse_propostas response
-        parse_suplentes response
-        parse_eleicoes response
+          @candidato = parse_perfil response
+          parse_bens response
+          parse_certidoes response
+          parse_propostas response
+          parse_suplentes response
+          parse_eleicoes response
+
+          @candidato.scraped_at = Time.now
+          @candidato.save
+        rescue Exception => e
+          logger.error "SCRAPER ERROR: Candidato ID :#{@candidato.id} #{e.backtrace.join("\n")}"
+          @candidato.scraped_at = nil
+          @candidato.save
+        end
       end
     end
   end

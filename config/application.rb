@@ -1,6 +1,8 @@
 require 'mongoid'
 require 'mechanize'
 require 'pry'
+require 'sidekiq'
+
 
 dependencies = [
   File.expand_path('../initializers/**/*.rb', __FILE__),
