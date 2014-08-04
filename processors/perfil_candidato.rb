@@ -1,8 +1,8 @@
 module Processors
   class PerfilCandidato
-    include Formatter
+    include Eleicoes::Formatter
 
-    attr_accessor :id, :candidato, :persist_raw, :logger
+    attr_accessor :id, :candidato, :scraper, :persist_raw, :logger
 
     def self.process(id, options = {})
       executor = Processors::PerfilCandidato.new id, options
@@ -11,25 +11,20 @@ module Processors
 
     def initialize(id, options = {})
       @id = id
+      @scraper = Scraper.new options
       @logger = options.fetch :logger, Logger.new(STDOUT)
       @persist_raw = options.fetch :persist_raw, true
     end
 
-    def base_url
-      "http://divulgacand2014.tse.jus.br"
-    end
-
-    def candidato_url(url)
-      "#{base_url}#{url}"
+    def base_url(path='')
+      "http://divulgacand2014.tse.jus.br#{path}"
     end
 
     def persist_raw(data)
-      path = File.join Eleicoes::Application.root, 'data', 'candidatos'
+      path = File.join(Eleicoes::Application.root, 'data', 'candidatos')
       Dir.mkdir(path, 0766) unless Dir.exists?(path)
 
-      path = File.join path, "#{id}.txt"
-
-      File.open(path, "wb+") do |fs|
+      File.open(File.join(path,"#{id}.txt"), "wb+") do |fs|
         fs.write data
       end
     end
@@ -79,6 +74,8 @@ module Processors
       data.each_pair{ |k,v| c[k] = v }
       c.save
 
+      download_attachments data[:url_foto], "#{id}#{fileext(data[:url_foto])}", 'perfil'
+
       @candidato = c
     end
 
@@ -95,9 +92,12 @@ module Processors
       @candidato.certidoes.destroy_all
       response.search('#tab-docs tbody tr').each do |cert|
         a = cert.search('td a')
-        descricao = clean! a.attr('href').text
-        url = clean! a.text
+        url = clean! a.attr('href').text
+        descricao = clean! a.text
+
         Eleicao::Certidao.create(descricao: descricao, url: url, candidato:  @candidato)
+
+        download_attachments url, descricao, 'cerditoes'
       end
     end
 
@@ -105,9 +105,11 @@ module Processors
       @candidato.propostas.destroy_all
       response.search('#tab-propostas tbody tr').each do |cert|
         a = cert.search('td a')
-        descricao = clean! a.attr('href').text
-        url = clean! a.text
+        url = clean! a.attr('href').text
+        descricao = clean! a.text
         Eleicao::Proposta.create(descricao: descricao, url: url, candidato:  @candidato)
+
+        download_attachments url, descricao, 'propostas'
       end
     end
 
@@ -140,6 +142,16 @@ module Processors
       end
     end
 
+    def download_attachments(url, filename, dir)
+      path = File.join(Eleicoes::Application.root, 'data', 'anexos', id, dir)
+      FileUtils.mkpath(path, mode: 0766) unless Dir.exists?(path)
+
+      final_path = File.join path, filename_format(filename)
+
+      @logger.info "Download #{base_url url}"
+      @scraper.download base_url(url), final_path
+    end
+
     def process
       candidato = Eleicao::Candidato.find_by id: id
       if candidato.nil?
@@ -147,8 +159,7 @@ module Processors
       else
         logger.info "Candidato: #{candidato.id} - #{candidato.nome_completo}"
 
-        scraper = Scraper.new
-        response = scraper.get candidato_url(candidato.url_profile)
+        response = @scraper.get base_url(candidato.url_profile)
         persist_raw response.body if @persist_raw
 
         @candidato = parse_perfil response

@@ -1,6 +1,6 @@
 module Processors
   class VarreCandidatos
-    include Formatter
+    include Eleicoes::Formatter
 
     attr_accessor :uf, :cargo_id, :persist_raw, :logger
 
@@ -30,9 +30,7 @@ module Processors
       path = File.join Eleicoes::Application.root, 'data', CARGOS[cargo_id].downcase.parameterize
       Dir.mkdir(path, 0766) unless Dir.exists?(path)
 
-      path = File.join path, "#{uf}.txt"
-
-      File.open(path, "wb+") do |fs|
+      File.open(File.join(path,"#{id}.txt"), "wb+") do |fs|
         fs.write data
       end
     end

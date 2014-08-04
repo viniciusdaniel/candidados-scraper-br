@@ -32,7 +32,7 @@ module Eleicoes
     end
 
     def varre_perfis_candidatos
-      Processors::PerfilCandidato.process '280000000085'
+      Processors::PerfilCandidato.process '280000000085', debug: false
     end
 
     def self.run
