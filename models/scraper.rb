@@ -7,7 +7,9 @@ class Scraper
       agent.user_agent_alias = 'Linux Firefox'
       agent.follow_meta_refresh = true
       agent.keep_alive = true
-      agent.cookie_jar.save File.join(Eleicoes::Application.root, 'data', 'cookies.yml'), :yaml
+      agent.read_timeout = 120
+      agent.open_timeout = 60
+      agent.idle_timeout = 30
     end
 
     @retries = options.fetch :retries, 3
@@ -45,6 +47,13 @@ class Scraper
         retry
       end
       raise sk_er
+    rescue Timeout::Error => to_er
+      retries += 1
+      if retries <= @retries
+        logger.info "Retry #{retries} of #{@retries} for #{method.to_s.upcase}: #{args.inspect} "
+        retry
+      end
+      raise to_er
     end
   end
 end

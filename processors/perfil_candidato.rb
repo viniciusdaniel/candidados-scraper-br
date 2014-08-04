@@ -92,6 +92,8 @@ module Processors
       @candidato.certidoes.destroy_all
       response.search('#tab-docs tbody tr').each do |cert|
         a = cert.search('td a')
+        next if a.count.equal?(0)
+
         url = clean! a.attr('href').text
         descricao = clean! a.text
 
@@ -105,6 +107,8 @@ module Processors
       @candidato.propostas.destroy_all
       response.search('#tab-propostas tbody tr').each do |cert|
         a = cert.search('td a')
+        next if a.count.equal?(0)
+
         url = clean! a.attr('href').text
         descricao = clean! a.text
         Eleicao::Proposta.create(descricao: descricao, url: url, candidato:  @candidato)

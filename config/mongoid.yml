@@ -4,3 +4,7 @@ development:
       database: scraper_politicians_development
       hosts:
         - localhost:27017
+      options:
+        max_retries: 10
+        timeout: 30
+        pool_size: 50
