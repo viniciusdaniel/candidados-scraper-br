@@ -9,7 +9,10 @@ module Eleicoes
     end
 
     def filename_format(text)
-      text.parameterize
+      parts = text.split('.')
+      ext = parts.pop
+      text = parts.join('-').parameterize
+      "#{text}.#{ext}"
     end
 
     def fileext(url)
