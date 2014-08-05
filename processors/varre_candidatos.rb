@@ -28,7 +28,7 @@ module Processors
 
     def persist_raw(data)
       path = File.join Eleicoes::Application.root, 'data', CARGOS[cargo_id].downcase.parameterize
-      Dir.mkdir(path, 0766) unless Dir.exists?(path)
+      FileUtils.mkpath(path, mode: 0766) unless Dir.exists?(path)
 
       File.open(File.join(path,"#{id}.txt"), "wb+") do |fs|
         fs.write data
