@@ -30,7 +30,7 @@ module Processors
       path = File.join Eleicoes::Application.root, 'data', CARGOS[cargo_id].downcase.parameterize
       FileUtils.mkpath(path, mode: 0766) unless Dir.exists?(path)
 
-      File.open(File.join(path,"#{id}.txt"), "wb+") do |fs|
+      File.open(File.join(path,"#{@cargo_id}.txt"), "wb+") do |fs|
         fs.write data
       end
     end
