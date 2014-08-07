@@ -173,6 +173,8 @@ module Processors
       @logger.info "Screenshot #{base_url candidato.url_profile} #{final_path}"
       params = %W(
         /usr/bin/xvfb-run
+          --auto-servernum
+          --server-num=1
           --server-args="-screen 0, 1024x768x24"
 
         /usr/bin/cutycapt
