@@ -25,11 +25,12 @@ namespace :eleicoes do
     semaphore = Mutex.new
     candidato_ids = Eleicao::Candidato.pluck(:id)
     should_parse = {
-        bens: true,
-        certidoes: true,
-        propostas: true,
-        suplentes: true,
-        eleicoes: true,
+        perfil: false,
+        bens: false,
+        certidoes: false,
+        propostas: false,
+        suplentes: false,
+        eleicoes: false,
         screenshot: true,
     }
 

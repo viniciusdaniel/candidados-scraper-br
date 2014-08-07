@@ -11,6 +11,7 @@ module Processors
 
     def initialize(id, options = {})
       @id = id
+      @candidato = Eleicao::Candidato.find_or_initialize_by id: @id
       @scraper = Scraper.new options
       @logger = options.fetch :logger, Logger.new(STDOUT)
       @persist_raw = options.fetch :persist_raw, true
@@ -78,13 +79,10 @@ module Processors
       iframe = response.search('#tab-sit-procss iframe')
       data[:acompanhamento_processual_url] = clean! iframe.attr('src').text unless iframe
 
-      c = Eleicao::Candidato.find_or_initialize_by id: id
-      data.each_pair{ |k,v| c[k] = v }
-      c.save
+      data.each_pair{ |k,v| @candidato[k] = v }
+      @candidato.save
 
       download_attachments data[:url_foto], "#{id}#{fileext(data[:url_foto])}", 'perfil'
-
-      @candidato = c
     end
 
     def parse_bens(response)
@@ -201,8 +199,7 @@ module Processors
           response = @scraper.get base_url(@candidato.url_profile)
           persist_raw response.body if @persist_raw
 
-          @candidato = parse_perfil response
-
+          parse_perfil response if @should_parse[:perfi]
           parse_bens response if @should_parse[:bens]
           parse_certidoes response if @should_parse[:certidoes]
           parse_propostas response if @should_parse[:propostas]
