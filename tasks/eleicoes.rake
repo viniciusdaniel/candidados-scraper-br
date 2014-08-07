@@ -24,14 +24,22 @@ namespace :eleicoes do
     logger = Logger.new File.join(Eleicoes::Application.root, 'logs', 'varre_perfis.log')
     semaphore = Mutex.new
     candidato_ids = Eleicao::Candidato.pluck(:id)
-
+    should_parse = {
+        bens: true,
+        certidoes: true,
+        propostas: true,
+        suplentes: true,
+        eleicoes: true,
+        screenshot: true,
+    }
+        
     0.upto(max_threads) do |thread_count|
       threads << Thread.new(thread_count) do |_|
         begin
           candidato_id = semaphore.synchronize { candidato_ids.pop }
           break if candidato_id.nil?
 
-          processor = Processors::PerfilCandidato.new candidato_id, logger: logger
+          processor = Processors::PerfilCandidato.new candidato_id, logger: logger, should_parse: should_parse
           processor.process
         end while true
       end
