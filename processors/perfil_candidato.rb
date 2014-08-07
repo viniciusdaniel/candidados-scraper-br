@@ -21,7 +21,6 @@ module Processors
           propostas: true,
           suplentes: true,
           eleicoes: true,
-          screenshot: true,
       }.merge!(options.fetch(:should_parse,{}))
     end
 
@@ -162,34 +161,7 @@ module Processors
       @scraper.download base_url(url), final_path
     end
 
-    def screenshot
-      path = File.join(Eleicoes::Application.root, 'data', 'anexos', id, 'screenshot')
-      FileUtils.mkpath(path, mode: 0766) unless Dir.exists?(path)
-
-      final_path = File.join path, "#{id}.png"
-
-      @logger.info "Screenshot #{base_url candidato.url_profile} #{final_path}"
-      params = %W(
-        /usr/bin/xvfb-run
-          --auto-servernum
-          --server-num=1
-          --server-args="-screen 0, 1024x768x24"
-
-        /usr/bin/cutycapt
-          --url="#{base_url(candidato.url_profile)}"
-          --out="#{final_path}"
-          --out-format=png
-          --max-wait=360000
-          --app-name="Mozilla"
-          --app-version="5.0"
-          --user-agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:30.0) Gecko/20100101 Firefox/30.0"
-      ).join ' '
-
-      %x(#{params})
-    end
-
     def process
-      @candidato = Eleicao::Candidato.find_by id: id
       if @candidato.nil?
         logger.warn "Candidato não encontrado pelo ID #{id}"
       else
@@ -205,7 +177,6 @@ module Processors
           parse_propostas response if @should_parse[:propostas]
           parse_suplentes response if @should_parse[:suplentes]
           parse_eleicoes response if @should_parse[:eleicoes]
-          screenshot if @should_parse[:screenshot]
 
           @candidato.scraped_at = Time.now
           @candidato.save

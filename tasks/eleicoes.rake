@@ -25,13 +25,12 @@ namespace :eleicoes do
     semaphore = Mutex.new
     candidato_ids = Eleicao::Candidato.pluck(:id)
     should_parse = {
-        perfil: false,
-        bens: false,
-        certidoes: false,
-        propostas: false,
-        suplentes: false,
-        eleicoes: false,
-        screenshot: true,
+        perfil: true,
+        bens: true,
+        certidoes: true,
+        propostas: true,
+        suplentes: true,
+        eleicoes: true,
     }
 
     0.upto(max_threads) do |thread_count|
