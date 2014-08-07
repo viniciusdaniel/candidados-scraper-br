@@ -32,7 +32,7 @@ namespace :eleicoes do
         eleicoes: true,
         screenshot: true,
     }
-        
+
     0.upto(max_threads) do |thread_count|
       threads << Thread.new(thread_count) do |_|
         begin

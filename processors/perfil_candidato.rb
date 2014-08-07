@@ -172,14 +172,17 @@ module Processors
 
       @logger.info "Screenshot #{base_url candidato.url_profile} #{final_path}"
       params = %W(
+        /usr/bin/xvfb-run
+          --server-args="-screen 0, 1024x768x24"
+
         /usr/bin/cutycapt
-        --url="#{base_url(candidato.url_profile)}"
-        --out="#{final_path}"
-        --out-format=png
-        --max-wait=360000
-        --app-name="Mozilla"
-        --app-version="5.0"
-        --user-agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:30.0) Gecko/20100101 Firefox/30.0"
+          --url="#{base_url(candidato.url_profile)}"
+          --out="#{final_path}"
+          --out-format=png
+          --max-wait=360000
+          --app-name="Mozilla"
+          --app-version="5.0"
+          --user-agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:30.0) Gecko/20100101 Firefox/30.0"
       ).join ' '
 
       %x(#{params})
