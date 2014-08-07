@@ -2,7 +2,7 @@ module Processors
   class PerfilCandidato
     include Eleicoes::Formatter
 
-    attr_accessor :id, :candidato, :scraper, :persist_raw, :logger
+    attr_accessor :id, :candidato, :scraper, :persist_raw, :should_parse, :logger
 
     def self.process(id, options = {})
       executor = Processors::PerfilCandidato.new id, options
@@ -14,6 +14,14 @@ module Processors
       @scraper = Scraper.new options
       @logger = options.fetch :logger, Logger.new(STDOUT)
       @persist_raw = options.fetch :persist_raw, true
+      @should_parse = {
+          bens: true,
+          certidoes: true,
+          propostas: true,
+          suplentes: true,
+          eleicoes: true,
+          screenshot: true,
+      }.merge!(options.fetch(:should_parse,{}))
     end
 
     def base_url(path='')
@@ -156,6 +164,27 @@ module Processors
       @scraper.download base_url(url), final_path
     end
 
+    def screenshot
+      path = File.join(Eleicoes::Application.root, 'data', 'anexos', id, 'screenshot')
+      FileUtils.mkpath(path, mode: 0766) unless Dir.exists?(path)
+
+      final_path = File.join path, "#{id}.png"
+
+      @logger.info "Screenshot #{base_url candidato.url_profile} #{final_path}"
+      params = %W(
+        /usr/bin/cutycapt
+        --url="#{base_url(candidato.url_profile)}"
+        --out="#{final_path}"
+        --out-format=png
+        --max-wait=360000
+        --app-name="Mozilla"
+        --app-version="5.0"
+        --user-agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:30.0) Gecko/20100101 Firefox/30.0"
+      ).join ' '
+
+      %x(#{params})
+    end
+
     def process
       @candidato = Eleicao::Candidato.find_by id: id
       if @candidato.nil?
@@ -168,11 +197,13 @@ module Processors
           persist_raw response.body if @persist_raw
 
           @candidato = parse_perfil response
-          parse_bens response
-          parse_certidoes response
-          parse_propostas response
-          parse_suplentes response
-          parse_eleicoes response
+
+          parse_bens response if @should_parse[:bens]
+          parse_certidoes response if @should_parse[:certidoes]
+          parse_propostas response if @should_parse[:propostas]
+          parse_suplentes response if @should_parse[:suplentes]
+          parse_eleicoes response if @should_parse[:eleicoes]
+          screenshot if @should_parse[:screenshot]
 
           @candidato.scraped_at = Time.now
           @candidato.save
