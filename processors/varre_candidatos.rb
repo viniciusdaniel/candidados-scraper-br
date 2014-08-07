@@ -12,6 +12,7 @@ module Processors
     def initialize(uf, cargo_id, options = {})
       @uf = uf
       @cargo_id = cargo_id
+      @scraper = Scraper.new
       @logger = options.fetch :logger, Logger.new(STDOUT)
       @persist_raw = options.fetch :persist_raw, true
 
@@ -30,20 +31,20 @@ module Processors
       path = File.join Eleicoes::Application.root, 'data', CARGOS[cargo_id].downcase.parameterize
       FileUtils.mkpath(path, mode: 0766) unless Dir.exists?(path)
 
-      File.open(File.join(path,"#{@cargo_id}.txt"), "wb+") do |fs|
+      File.open(File.join(path,"#{cargo_id}.txt"), "wb+") do |fs|
         fs.write data
       end
     end
 
     def process
-      scraper = Scraper.new
+
       response = scraper.get page_url
       persist_raw response.body if @persist_raw
 
       lines = response.search '#tbl-candidatos tr'
 
       if lines
-        @logger.info "Resultado: #{lines.count} #{lines.count != 1 ? 'candidatos encontrados' : 'candidato encontrado'}"
+        logger.info "Resultado: #{lines.count} #{lines.count != 1 ? 'candidatos encontrados' : 'candidato encontrado'}"
 
         lines.each do |line|
           data = {}
