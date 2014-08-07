@@ -47,4 +47,27 @@ namespace :eleicoes do
 
     threads.each{ |t| t.join }
   end
+
+  desc "Varre os perfis encontrados previamente e tira um screenshot da página"
+  task :screenshot_perfis, :max_threads do |_, args|
+    max_threads = (args[:max_threads] || 20).to_i
+    threads = []
+    logger = Logger.new File.join(Eleicoes::Application.root, 'logs', 'screenshot_perfis.log')
+    semaphore = Mutex.new
+    candidato_ids = Eleicao::Candidato.pluck(:id)
+
+    0.upto(max_threads) do |thread_count|
+      threads << Thread.new(thread_count) do |_|
+        begin
+          candidato_id = semaphore.synchronize { candidato_ids.pop }
+          break if candidato_id.nil?
+
+          processor = Processors::ScreenshotCandidato.new candidato_id, logger: logger
+          processor.process
+        end while true
+      end
+    end
+
+    threads.each{ |t| t.join }
+  end
 end

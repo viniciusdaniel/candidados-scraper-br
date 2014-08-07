@@ -23,14 +23,14 @@ module Processors
       if candidato.nil?
         logger.warn "Candidato não encontrado pelo ID #{id}"
       else
-        logger.info "Screenshot: #{candidato.id} - #{candidato.nome_completo}"
+        logger.info "Candidato: #{candidato.id} - #{candidato.nome_completo}"
 
         begin
           path = File.join(Eleicoes::Application.root, 'data', 'anexos', id, 'screenshot')
           FileUtils.mkpath(path, mode: 0766) unless Dir.exists?(path)
 
           final_path = File.join path, "#{id}.png"
-  
+
           logger.info "Screenshot #{base_url candidato.url_profile} #{final_path}"
           params = %W(
             /usr/bin/xvfb-run
