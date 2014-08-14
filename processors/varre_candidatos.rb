@@ -2,7 +2,7 @@ module Processors
   class VarreCandidatos
     include Eleicoes::Formatter
 
-    attr_accessor :uf, :cargo_id, :persist_raw, :logger
+    attr_accessor :uf, :scraper, :cargo_id, :persist_raw, :logger
 
     def self.process(uf, cargo_id, options = {})
       executor = Processors::VarreCandidatos.new uf, cargo_id, options
@@ -37,7 +37,6 @@ module Processors
     end
 
     def process
-
       response = scraper.get page_url
       persist_raw response.body if @persist_raw
 

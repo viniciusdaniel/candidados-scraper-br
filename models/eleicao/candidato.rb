@@ -39,7 +39,7 @@ module Eleicao
 
     include Mongoid::Timestamps
 
-    has_one :cargo, class_name: "Eleicao::Cargo"
+    belongs_to :cargo, class_name: "Eleicao::Cargo"
     has_many :bens, class_name: "Eleicao::Bem"
     has_many :certidoes, class_name: "Eleicao::Certidao"
     has_many :propostas, class_name: "Eleicao::Proposta"
