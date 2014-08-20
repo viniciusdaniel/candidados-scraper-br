@@ -49,6 +49,9 @@ module Processors
       data[:nome_completo] = clean! table.search('tr:nth-of-type(2) td:nth-of-type(1)').text
       data[:sexo] = clean! table.search('tr:nth-of-type(2) td:nth-of-type(2)').text
 
+      data[:data_nascimento] = date_from_string clean!(table.search('tr:nth-of-type(3) td:nth-of-type(1)').text)
+      data[:estado_civil] = clean! table.search('tr:nth-of-type(3) td:nth-of-type(2)').text
+
       data[:cor] = clean! table.search('tr:nth-of-type(4) td:nth-of-type(1)').text
 
       data[:nacionalidade] = clean! table.search('tr:nth-of-type(5) td:nth-of-type(1)').text

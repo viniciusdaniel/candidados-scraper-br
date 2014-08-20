@@ -8,6 +8,10 @@ module Eleicoes
       DateTime.strptime(text, "%d/%m/%Y %H:%M:%S")
     end
 
+    def date_from_string(text)
+      DateTime.strptime(text, "%d/%m/%Y")
+    end
+
     def filename_format(text)
       parts = text.split('.')
       ext = parts.pop
