@@ -37,3 +37,5 @@ build/
 .idea/
 data/
 logs/*
+
+dump/
